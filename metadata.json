@@ -1,0 +1,6 @@
+{
+  "name": "MAZOUM TECH",
+  "description": "Assistant personnel intelligent polyvalent — vocal, conversationnel, vision et studio de création IA",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
