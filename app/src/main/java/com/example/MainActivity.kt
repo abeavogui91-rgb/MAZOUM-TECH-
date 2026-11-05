@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ui.components.MazoumBottomBar
 import com.example.ui.navigation.NavigationItem
 import com.example.ui.navigation.SubRoutes
+import com.example.ui.screens.AssistantConversationnelScreen
 import com.example.ui.screens.AuthScreen
 import com.example.ui.screens.ChatScreen
 import com.example.ui.screens.DashboardScreen
@@ -159,12 +160,7 @@ fun MazoumApp(
             }
 
             composable(NavigationItem.Assistant.route) {
-                ChatScreen(
-                    messages = chatMessages,
-                    isLoading = isChatLoading,
-                    voiceManager = viewModel.voiceManager,
-                    onSendMessage = { viewModel.sendChatMessage(it) },
-                    onSaveAsNote = { title, content -> viewModel.addNote(title, content, "Assistant IA") },
+                AssistantConversationnelScreen(
                     onNavigate = { route -> navController.navigate(route) }
                 )
             }

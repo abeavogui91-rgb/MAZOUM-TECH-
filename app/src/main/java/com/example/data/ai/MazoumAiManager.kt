@@ -2,6 +2,7 @@ package com.example.data.ai
 
 import android.graphics.Bitmap
 import android.util.Log
+import com.example.repository.GeminiRepository
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.Content
@@ -17,9 +18,11 @@ import kotlinx.coroutines.withTimeout
 
 private const val TAG = "MazoumAiManager"
 
-class MazoumAiManager {
+class MazoumAiManager(
+    val geminiRepository: GeminiRepository = GeminiRepository()
+) {
 
-    // Lazy initialization of models
+    // Lazy initialization of models for specialized tasks
     private val generalModel by lazy {
         Firebase.ai.generativeModel(
             modelName = "gemini-3.8-flash",
@@ -79,13 +82,13 @@ class MazoumAiManager {
         )
     }
 
-    // Streaming chat with memory context
+    // Streaming chat with memory context via GeminiRepository
     fun streamChat(
         message: String,
         userName: String,
         userRole: String,
         memoryFacts: List<String>
-    ): Flow<String> = flow {
+    ): Flow<String> {
         val memoryBlock = if (memoryFacts.isNotEmpty()) {
             "\n[MÉMOIRE PERSONNELLE CONSERVÉE]:\n" + memoryFacts.joinToString("\n") { "- $it" }
         } else ""
@@ -96,19 +99,10 @@ class MazoumAiManager {
             Message de l'utilisateur: $message
         """.trimIndent()
 
-        val fullText = StringBuilder()
-        withTimeout(60_000L) {
-            generalModel.generateContentStream(prompt).collect { chunk ->
-                val chunkText = chunk.text.orEmpty()
-                if (chunkText.isNotEmpty()) {
-                    fullText.append(chunkText)
-                    emit(fullText.toString())
-                }
-            }
-        }
-    }.flowOn(Dispatchers.IO)
+        return geminiRepository.sendMessageStream(prompt)
+    }
 
-    // Direct chat (non-streaming fallback or speech synthesis)
+    // Direct chat (non-streaming fallback or speech synthesis) via GeminiRepository
     suspend fun generateChatResponse(
         message: String,
         userName: String,
@@ -126,10 +120,7 @@ class MazoumAiManager {
         """.trimIndent()
 
         try {
-            withTimeout(60_000L) {
-                val response = generalModel.generateContent(prompt)
-                response.text ?: "Je n'ai pas pu générer de réponse."
-            }
+            geminiRepository.sendMessage(prompt)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

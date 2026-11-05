@@ -24,4 +24,23 @@ class ExampleUnitTest {
       assertNotNull("Title should not be null", item.title)
     }
   }
+
+  @Test
+  fun geminiRepository_initializesWithGemini15FlashModel() {
+    val repository = com.example.repository.GeminiRepository()
+    assertEquals("gemini-1.5-flash", repository.modelName)
+  }
+
+  @Test
+  fun assistantViewModel_initializesWithGreetingAndState() {
+    val viewModel = com.example.ui.viewmodel.AssistantViewModel()
+    val initialMessages = viewModel.messages.value
+    assertTrue("Should have at least 1 greeting message", initialMessages.isNotEmpty())
+    assertEquals(com.example.ui.model.MessageSender.AI, initialMessages.first().sender)
+    assertFalse(viewModel.isLoading.value)
+    assertEquals("", viewModel.inputText.value)
+
+    viewModel.onInputTextChanged("Bonjour MAZOUM")
+    assertEquals("Bonjour MAZOUM", viewModel.inputText.value)
+  }
 }
